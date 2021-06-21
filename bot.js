@@ -1,5 +1,6 @@
 const { default: axios } = require('axios');
-const {Client} = require('discord.js');
+const Discord = require('discord.js');
+const {Client} = Discord;
 const dotenv = require('dotenv');
 
 // load environment variables
@@ -19,10 +20,7 @@ bot.on('message', async (message)  => {
     if(message.content.startsWith('/p')) {
         
         const [command, ...args] = message.content.split(' ');
-        
-
         let [coin, currency] = args;
-
         if(currency === '' || currency === undefined) {
             currency = 'usdt'
         }
@@ -30,16 +28,17 @@ bot.on('message', async (message)  => {
         try {
             const {data} = await axios.get(`https://api.wazirx.com/api/v2/tickers/${coin}${currency}`);
 
-            return message.reply(`
-            \nThe current price of 1 **${coin.toUpperCase()}**
-            \nPrice[${currency}]: ${data.ticker.last}
-            \nLow price: ${data.ticker.low}
-            \nHigh price: ${data.ticker.high}`);
+            const formatData = new Discord.MessageEmbed().addFields(
+                { name: 'The current price of 1 ', value: `**${coin.toUpperCase()}**` },
+                { name: 'Current price', value: `${data.ticker.last}`, inline: true },
+                { name: 'Low price', value: `${data.ticker.low}`, inline: true },
+                { name: 'High price', value: `${data.ticker.high}`, inline: true },
+           );
 
+            return message.reply(formatData);
         } catch (error) {
-            console.log('Failed to get price', error);
+            message.reply("Can't find your bullshit coin");
         }
     }
-
 })
 
